@@ -1,0 +1,90 @@
+import streamlit as st
+from openai import OpenAI
+
+# 👉 এখানে তোমার API key বসাও
+API_KEY = "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"
+client = OpenAI(api_key=API_KEY)
+
+# Streamlit Config
+st.set_page_config(page_title="বাংলা এআই চ্যাটবট 🤖", page_icon="🤖", layout="centered")
+
+# Custom CSS (মোবাইল-ফ্রেন্ডলি স্টাইল)
+st.markdown("""
+    <style>
+        .stApp {
+            background-color: #f9f9f9;
+            font-family: 'SolaimanLipi', sans-serif;
+        }
+        .chat-bubble-user {
+            background-color: #DCF8C6;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin: 5px 0;
+            text-align: right;
+            display: inline-block;
+            max-width: 80%;
+        }
+        .chat-bubble-ai {
+            background-color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin: 5px 0;
+            text-align: left;
+            display: inline-block;
+            max-width: 80%;
+            border: 1px solid #ddd;
+        }
+        .chat-container {
+            max-height: 65vh;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #eee;
+        }
+        .stTextInput input {
+            font-size: 16px;
+            padding: 10px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+st.title("🤖 বাংলা এআই চ্যাটবট")
+st.markdown("💬 বাংলায় প্রশ্ন করো, এআই উত্তর দেবে।")
+
+# Session state messages
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "system", "content": "তুমি একজন সহায়ক AI অ্যাসিস্ট্যান্ট, সব উত্তর বাংলায় দেবে।"}
+    ]
+
+# চ্যাট দেখানো
+st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
+for msg in st.session_state.messages[1:]:
+    if msg["role"] == "user":
+        st.markdown(f"<div class='chat-bubble-user'>👤 {msg['content']}</div>", unsafe_allow_html=True)
+    elif msg["role"] == "assistant":
+        st.markdown(f"<div class='chat-bubble-ai'>🤖 {msg['content']}</div>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ইনপুট
+prompt = st.chat_input("এখানে লিখুন...")
+if prompt:
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.markdown(f"<div class='chat-bubble-user'>👤 {prompt}</div>", unsafe_allow_html=True)
+
+    # AI উত্তর
+    reply = ""
+    response = client.chat.completions.create(
+        model="gpt-5",
+        messages=st.session_state.messages,
+        stream=True
+    )
+
+    reply_placeholder = st.empty()
+    for chunk in response:
+        if chunk.choices[0].delta.get("content"):
+            text = chunk.choices[0].delta["content"]
+            reply += text
+            reply_placeholder.markdown(f"<div class='chat-bubble-ai'>🤖 {reply}</div>", unsafe_allow_html=True)
+
+    st.session_state.messages.append({"role": "assistant", "content": reply})
