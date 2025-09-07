@@ -22,7 +22,7 @@ create .env file
 
 ### 1️⃣ Clone Repo
 ```bash
-git clone https://github.com/your-username/bangla-ai-chatbot.git
+git clone https://github.com/SGSAKIB/BANGLA-AI-CHAT-BOT.git
 cd bangla-ai-chatbot
 
 RUN STEP
@@ -36,3 +36,4 @@ pip install -r requirements.txt
 
 
 streamlit run app.py
+
